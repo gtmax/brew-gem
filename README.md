@@ -33,26 +33,16 @@ sudo /usr/bin/gem update --system
 Install
 -------
 
-    brew install brew-gem
-
+  Clone this repo.
 
 Usage
 -----
 
-    brew gem install heroku
-
-To install a specific version:
-
-    brew gem install heroku 3.8.3
-    
-To upgrade:
-
-    brew gem upgrade heroku
-    
-To uninstall:
-
-    brew gem uninstall heroku
-
+    bin/brew-gem install <gem-name> [<version>] # install from RubyGems
+    bin/brew-gem install --local=<path-to-local.gem> # install from local gemfile
+    bin/brew-gem install --github=<git@github.com:project/repo.git> # install from local github gem
+    bin/brew-gem update <gem-name> # update a gem installed from RubyGems
+    bin/brew-gem uninstall gem-name"
 
 ### BASH/ZSH Completions
 
