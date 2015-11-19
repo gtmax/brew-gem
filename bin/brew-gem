@@ -153,11 +153,11 @@ class <%= klass %> < Formula
         f << <<-RUBY
 #!/usr/bin/ruby
 # brew-gem-generated wrapper that locks the gemset of the installed gem
-# CURRENT_GEM_HOME and CURRENT_GEM_PATH hold the values of the actual GEM_HOME and GEM_PATH
+# ORIG_GEM_HOME and ORIG_GEM_PATH hold the values of the actual GEM_HOME and GEM_PATH
 # at the moment of invocation of this script - if it wants to launch another ruby script 
 # in its current gemset, just copy them back to GEM_HOME and GEM_PATH before invoking.
-ENV['CURRENT_GEM_HOME'] = ENV['GEM_HOME']
-ENV['CURRENT_GEM_PATH'] = ENV['GEM_PATH']
+ENV['ORIG_GEM_HOME'] = ENV['GEM_HOME']
+ENV['ORIG_GEM_PATH'] = ENV['GEM_PATH']
 ENV['GEM_HOME'] = "#{prefix}"
 ENV['GEM_PATH'] = "#{prefix}"
 $:.unshift(#{ruby_libs.map(&:inspect).join(",")})
