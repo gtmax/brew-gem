@@ -6,6 +6,7 @@ if  !ARGV[0] || ARGV[0] == 'help'
   abort "Usages:
   #{$0} install <gem-name> [<version>] # install from RubyGems
   #{$0} install --local=<path-to-local.gem> # install from local gemfile
+  #{$0} install --local=<path-to-local-dir> # install from local gem dir
   #{$0} install --github=<git@github.com:project/repo.git> # install from local github gem
   #{$0} update <gem-name> # update a gem installed from RubyGems
   #{$0} uninstall gem-name"
@@ -28,21 +29,32 @@ end
 
 command = ARGV[0]
 if ARGV[1] =~ /^--local/
-  local_gem_path = File.expand_path(ARGV[1].match(/^--local=(.*)/)[1])
-  name, version = local_gem_path.match(/.*\/([^-]+)-(.*)\.gem$/)[1..2]
+  local_path = File.expand_path(ARGV[1].match(/^--local=(.*)/)[1])
+  if /\.gem$/ =~ local_path
+    # install from local gem
+    name, version = local_path.match(/.*\/([^-]+)-(.*)\.gem$/)[1..2]
+  else
+    # install from local dir
+    gemspec_name = `ls #{File.join(local_path, '*')}.gemspec`.chomp
+
+    # build local gem
+    Dir.chdir(local_path) do
+      run "gem build #{gemspec_name}"
+    end
+
+    gem_name = `ls #{File.join(local_path, '*')}.gem`.chomp
+
+    # recursively call self to install from local gem
+    run "#{$0} install --local=#{gem_name}", takeover: true
+  end
 elsif ARGV[1] =~ /^--github/
   # clone from github and build gem
   github_gem_path = ARGV[1].match(/^--github=(.*)/)[1]
   name = github_gem_path.match(/.*\/(.*)\.git$/)[1]
   target_dir_name = File.join(Dir.tmpdir, "build-#{name}-#{rand(100000000)}")
   run "git clone #{github_gem_path} #{target_dir_name}"
-  Dir.chdir(target_dir_name) do
-    run "gem build #{File.join(target_dir_name, name)}.gemspec"
-  end
-  gem_name = `ls #{File.join(target_dir_name, '*')}.gem`.chomp
-
-  # now install from local file
-  run "#{$0} install --local=#{gem_name}", takeover: true
+  # recursively call self to install from local dir
+  run "#{$0} install --local=#{target_dir_name}", takeover: true
 else # rubygems gem
   name = ARGV[1]
   version = ARGV[2] || $1
@@ -77,8 +89,8 @@ class RubyGemsDownloadStrategy < AbstractDownloadStrategy
   def fetch
     ohai "Fetching #{name} from gem source"
     HOMEBREW_CACHE.cd do
-      <% if local_gem_path %>
-        system "cp", "<%= local_gem_path %>", "."
+      <% if local_path %>
+        system "cp", "<%= local_path %>", "."
       <% else %>
         system "gem", "fetch", name, "--version", resource.version
       <% end %>
@@ -110,7 +122,7 @@ class <%= klass %> < Formula
     # they might not be there if, say, we change to a different rvm gemset
     ENV['GEM_HOME']="#{prefix}"
     ENV['GEM_PATH']="#{prefix}"
-    system "gem", "install", "<%= local_gem_path ? local_gem_path : 'cached_download' %>",
+    system "gem", "install", "<%= local_path ? local_path : 'cached_download' %>",
              "--no-ri",
              "--no-rdoc",
              "--no-wrapper",
@@ -140,8 +152,14 @@ class <%= klass %> < Formula
       (bin+file.basename).open('w') do |f|
         f << <<-RUBY
 #!/usr/bin/ruby
-ENV['GEM_HOME']="#{prefix}"
-ENV['GEM_PATH']="#{prefix}"
+# brew-gem-generated wrapper that locks the gemset of the installed gem
+# CURRENT_GEM_HOME and CURRENT_GEM_PATH hold the values of the actual GEM_HOME and GEM_PATH
+# at the moment of invocation of this script - if it wants to launch another ruby script 
+# in its current gemset, just copy them back to GEM_HOME and GEM_PATH before invoking.
+ENV['CURRENT_GEM_HOME'] = ENV['GEM_HOME']
+ENV['CURRENT_GEM_PATH'] = ENV['GEM_PATH']
+ENV['GEM_HOME'] = "#{prefix}"
+ENV['GEM_PATH'] = "#{prefix}"
 $:.unshift(#{ruby_libs.map(&:inspect).join(",")})
 load "#{file}"
         RUBY

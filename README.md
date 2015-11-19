@@ -38,11 +38,12 @@ Install
 Usage
 -----
 
-    bin/brew-gem install <gem-name> [<version>] # install from RubyGems
-    bin/brew-gem install --local=<path-to-local.gem> # install from local gemfile
-    bin/brew-gem install --github=<git@github.com:project/repo.git> # install from local github gem
-    bin/brew-gem update <gem-name> # update a gem installed from RubyGems
-    bin/brew-gem uninstall gem-name"
+  #{$0} install <gem-name> [<version>] # install from RubyGems
+  #{$0} install --local=<path-to-local.gem> # install from local gemfile
+  #{$0} install --local=<path-to-local-dir> # install from local gem dir
+  #{$0} install --github=<git@github.com:project/repo.git> # install from local github gem
+  #{$0} update <gem-name> # update a gem installed from RubyGems
+  #{$0} uninstall gem-name
 
 ### BASH/ZSH Completions
 
