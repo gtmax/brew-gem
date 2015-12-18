@@ -1,7 +1,7 @@
-brew-gem -- install gems as homebrew formulas
+brewgem -- install gems as homebrew formulas
 =============================================
 
-`brew gem` allows you to install any rubygem as a homebrew formula.
+`brewgem` allows you to install any rubygem as a homebrew formula.
 
 It works by generating a stub formula for homebrew, which looks something like this:
 
@@ -35,16 +35,20 @@ Install
 
   Clone this repo.
 
+  To install self (brewgem) via brew, just run:
+
+    bin/brewgem install --local=.
+
 Usage
 -----
 
-  bin/brew-gem install <gem-name> [<version>] # install from RubyGems
-  bin/brew-gem install --local=<path-to-local.gem> # install from local gemfile
-  bin/brew-gem install --local=<path-to-local-dir> # install from local gem dir
-  bin/brew-gem install --github=<git@github.com:project/repo.git> # install from local github gem
-  bin/brew-gem update <gem-name> # update a gem installed from RubyGems
-  bin/brew-gem uninstall gem-name
-  
+    brewgem install <gem-name> [<version>] # install from RubyGems
+    brewgem install --local=<path-to-local.gem> # install from local gemfile
+    brewgem install --local=<path-to-local-dir> # install from local gem dir
+    brewgem install --github=<git@github.com:project/repo.git> # install from github gem repo
+    brewgem update <gem-name> # update a gem from RubyGems
+    brewgem uninstall <gem-name>
+
 ### BASH/ZSH Completions
 
 To make use of completions for your gem, you need to install the
