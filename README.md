@@ -33,11 +33,14 @@ sudo /usr/bin/gem update --system
 Install
 -------
 
-  Clone this repo.
-
-  To install self (brewgem) via brew, just run:
+  Option 1. Clone this repo. Then, to install self (brewgem) via brew, just run:
 
     bin/brewgem install --local=.
+
+  Option 2. Brewgem is also a gem, so you can install it with:
+
+    gem install brewgem
+
 
 Usage
 -----
