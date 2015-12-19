@@ -3,16 +3,16 @@ require 'tempfile'
 
 module BrewGem
   class << self
-    def install(name, version, options = {})
-      perform(:install, name, version, options)
+    def install(options)
+      perform(:install, options)
     end
 
-    def update(name)
-      perform(:update, name)
+    def update(options)
+      perform(:update, options)
     end
 
-    def uninstall(name)
-      perform(:uninstall, name)
+    def uninstall(options)
+      perform(:uninstall, options)
     end
 
     def require_all_under(dir, recursive: true)
@@ -25,7 +25,9 @@ module BrewGem
     private
     # TODO: Refactor into several methods, and for that need to
     # run ERB from hash bindings instead of local method bindings
-    def perform(command, name = nil, version = nil, options = {})
+    def perform(command, options = {})
+      name, version = options.values_at(:name, :version)
+      
       ENV['HOMEBREW_VERBOSE']='true' if options[:verbose]
       if options[:local]
         local_path = File.expand_path(options[:local])
@@ -42,10 +44,11 @@ module BrewGem
             run "gem build #{gemspec_name}"
           end
 
-          gem_name = `ls #{File.join(local_path, '*')}.gem`.chomp
+          gem_path = `ls #{File.join(local_path, '*')}.gem`.chomp
 
           # recursively call self to install from local gem
-          run "#{$0} install --local=#{gem_name}", takeover: true
+          install(local: gem_path)
+          return
         end
       elsif options[:github]
         # clone from github and build gem
@@ -54,7 +57,8 @@ module BrewGem
         target_dir_name = File.join(Dir.tmpdir, "build-#{name}-#{rand(100000000)}")
         run "git clone #{github_gem_path} #{target_dir_name}"
         # recursively call self to install from local dir
-        run "#{$0} install --local=#{target_dir_name}", takeover: true
+        install(local: target_dir_name)
+        return
       else
         # install from rubygems
         gems = `gem list --remote "^#{name}$"`.lines
@@ -75,7 +79,7 @@ module BrewGem
           f.puts template.result(binding)
         end
 
-        system "brew #{command} #{filename}"
+        run "brew #{command} #{filename}"
       ensure
         File.unlink filename
       end
@@ -87,7 +91,7 @@ module BrewGem
           break unless run single_command
         end
       else
-        puts "Executing \"#{command}\"..."
+        puts "[brewgem] Executing \"#{command}\"...".purple
         if options[:takeover]
           exec command # take over the process
         else

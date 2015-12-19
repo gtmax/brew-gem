@@ -14,19 +14,19 @@ module BrewGem
     method_option :github, type: 'string'
     method_option :verbose, :type => :boolean
     def install(gem_name = nil, version = nil)
-      BrewGem.install(gem_name, version, options)
+      BrewGem.install(options.merge(name: gem_name, version: version))
     end
 
     desc 'update <gem-name>', COMMANDS[:update]
     method_option :verbose, :type => :boolean
     def update(gem_name)
-      BrewGem.update(gem_name)
+      BrewGem.update(name: gem_name)
     end
 
     desc 'uninstall <gem-name>', COMMANDS[:uninstall]
     method_option :verbose, :type => :boolean
     def uninstall(gem_name)
-      BrewGem.uninstall(gem_name)
+      BrewGem.uninstall(name: gem_name)
     end
   end
 end
