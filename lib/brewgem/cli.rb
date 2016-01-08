@@ -8,10 +8,11 @@ module BrewGem
       uninstall: 'Uninstall a gem installed from RubyGemss'
     }
 
-    desc 'install [<gem-name>] [<version>] [--local=<path-to-local-dir-or-.gem>] [--github=<git@github.com:project/repo.git]', 
+    desc 'install [<gem-name>] [<version>] [--local=<path-to-local-dir-or-.gem>] [--git=<git@github.com:project/repo.git [--ref=<git-branch-or-tag>]]', 
           COMMANDS[:install]
     method_option :local, type: 'string'
-    method_option :github, type: 'string'
+    method_option :git , type: 'string', aliases: '--github'
+    method_option :ref, type: 'string', aliases: ['--tag', '--branch']
     method_option :verbose, :type => :boolean
     def install(gem_name = nil, version = nil)
       BrewGem.install(options.merge(name: gem_name, version: version))

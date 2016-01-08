@@ -50,12 +50,14 @@ module BrewGem
           install(local: gem_path)
           return
         end
-      elsif options[:github]
+      elsif options[:git]
         # clone from github and build gem
-        github_gem_path = options[:github]
+        github_gem_path = options[:git]
         name = github_gem_path.match(/.*\/(.*)\.git$/)[1]
         target_dir_name = File.join(Dir.tmpdir, "build-#{name}-#{rand(100000000)}")
-        run "git clone #{github_gem_path} #{target_dir_name}"
+        git_command = "git clone #{github_gem_path} #{target_dir_name}"
+        git_command += " --single-branch -b #{options[:ref]}" if options[:ref]
+        run git_command
         # recursively call self to install from local dir
         install(local: target_dir_name)
         return

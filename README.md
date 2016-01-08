@@ -33,7 +33,7 @@ sudo /usr/bin/gem update --system
 Install
 -------
 
-  Option 1. Clone this repo. Then, to install self (brewgem) via brew, just run:
+  Option 1. Clone this repo and "bundle install". Then, to install self (brewgem) via brew, just run:
 
     bin/brewgem install --local=.
 
@@ -48,7 +48,8 @@ Usage
     brewgem install <gem-name> [<version>] # install from RubyGems
     brewgem install --local=<path-to-local.gem> # install from local gemfile
     brewgem install --local=<path-to-local-dir> # install from local gem dir
-    brewgem install --github=<git@github.com:project/repo.git> # install from github gem repo
+    brewgem install --git=<git@github.com:project/repo.git> # install from git gem repo
+    brewgem install --git=<git@github.com:project/repo.git> --ref=<git-branch-or-tag> # install from specific tag or branch in git gem repo
     brewgem update <gem-name> # update a gem from RubyGems
     brewgem uninstall <gem-name>
 
