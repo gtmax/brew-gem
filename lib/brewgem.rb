@@ -37,14 +37,16 @@ module BrewGem
           name, version = local_path.match(/.*\/([^-]+)-(.*)\.gem$/)[1..2]
         else
           # install from local dir
-          gemspec_name = `ls #{File.join(local_path, '*')}.gemspec`.chomp
+          gemspec_path = `ls #{File.join(local_path, '*')}.gemspec`.chomp
 
           # build local gem
           Dir.chdir(local_path) do
-            run "gem build #{gemspec_name}"
+            run "gem build #{gemspec_path}"
           end
 
-          gem_path = `ls #{File.join(local_path, '*')}.gem`.chomp
+          # find the .gem that was built
+          gemspec = Gem::Specification::load(gemspec_path)
+          gem_path = File.join(local_path, "#{File.basename(gemspec.full_gem_path)}.gem")
 
           # recursively call self to install from local gem
           install(local: gem_path)
