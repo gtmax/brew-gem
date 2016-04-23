@@ -5,11 +5,7 @@ class RubyGemsDownloadStrategy < AbstractDownloadStrategy
   def fetch
     ohai "Fetching #{name} from gem source"
     HOMEBREW_CACHE.cd do
-      <% if local_path %>
-        system "cp", "<%= local_path %>", "."
-      <% else %>
-        system "gem", "fetch", name, "--version", resource.version
-      <% end %>
+      system "gem", "fetch", name, "--version", resource.version
     end
   end
 
@@ -22,9 +18,18 @@ class RubyGemsDownloadStrategy < AbstractDownloadStrategy
   end
 end
 
+class LocalGemDownloadStrategy < AbstractDownloadStrategy
+  def cached_location
+    Pathname.new('<%= local_path %>')
+  end
+end
+
 class <%= klass %> < Formula
-  url "<%= name %>", :using => RubyGemsDownloadStrategy
+  url "<%= name %>", :using => <%= local_path ? 'LocalGemDownloadStrategy' : 'RubyGemsDownloadStrategy' %>
   version "<%= version %>"
+  <% if local_path %>
+    sha256 '<%= require 'digest'; Digest::SHA256.hexdigest(File.read(local_path)) %>'
+  <% end %>
 
   def install
     # Copy user's RubyGems config to temporary build home.
@@ -38,7 +43,7 @@ class <%= klass %> < Formula
     # they might not be there if, say, we change to a different rvm gemset
     ENV['GEM_HOME']="#{prefix}"
     ENV['GEM_PATH']="#{prefix}"
-    system "gem", "install", "<%= local_path ? local_path : 'cached_download' %>",
+    system "gem", "install", cached_download,
              "--no-ri",
              "--no-rdoc",
              "--no-wrapper",
